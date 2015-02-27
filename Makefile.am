@@ -1,1 +1,1 @@
-SUBDIRS = gputop po
+SUBDIRS = wslay h2o gputop po
