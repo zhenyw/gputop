@@ -63,6 +63,7 @@ struct tab
 };
 
 #define TAB_TITLE_WIDTH 15
+#define SPARKLINE_HEIGHT 3
 
 enum {
     INPUT_UNHANDLED = 1,
@@ -242,6 +243,232 @@ perf_counters_redraw(WINDOW *win)
 }
 
 static void
+print_percentage_spark(WINDOW *win, int x, int y, float percent)
+{
+    int bar_len = SPARKLINE_HEIGHT * 8 * (percent + .5) / 100.0;
+    static const char *bars[] = {
+	" ",
+	"▁",
+	"▂",
+	"▃",
+	"▄",
+	"▅",
+	"▆",
+	"▇",
+	"█"
+    };
+    int i;
+
+    for (i = bar_len; i >= 8; i -= 8) {
+	wmove(win, y, x);
+        wprintw(win, "%s", bars[8]);
+	y--;
+    }
+    if (i) {
+	wmove(win, y, x);
+        wprintw(win, "%s", bars[i]);
+    }
+
+}
+
+static void
+trace_print_percentage_oa_counter(WINDOW *win, int x, int y,
+				  struct gputop_perf_query_counter *counter)
+{
+    float percentage;
+
+    switch(counter->data_type) {
+    case GPUTOP_PERFQUERY_COUNTER_DATA_UINT32:
+	percentage = read_uint32_oa_counter(counter->oa_counter, gputop_perf_accumulator);
+	break;
+
+    case GPUTOP_PERFQUERY_COUNTER_DATA_UINT64:
+	percentage = read_uint64_oa_counter(counter->oa_counter, gputop_perf_accumulator);
+	break;
+
+    case GPUTOP_PERFQUERY_COUNTER_DATA_FLOAT:
+	percentage = read_float_oa_counter(counter->oa_counter, gputop_perf_accumulator);
+	break;
+    case GPUTOP_PERFQUERY_COUNTER_DATA_DOUBLE:
+	percentage = read_double_oa_counter(counter->oa_counter, gputop_perf_accumulator);
+	break;
+
+    case GPUTOP_PERFQUERY_COUNTER_DATA_BOOL32:
+	percentage = read_bool_oa_counter(counter->oa_counter, gputop_perf_accumulator);
+	break;
+    }
+
+    if (percentage <= 100) {
+	wattrset(win, COLOR_PAIR (GPUTOP_BAR_GOOD_COLOR));
+	//wbkgd(win, COLOR_PAIR (GPUTOP_BAR_GOOD_COLOR));
+        print_percentage_spark(win, x, y, percentage);
+    } else {
+	wattrset(win, COLOR_PAIR (GPUTOP_BAR_BAD_COLOR));
+	//wbkgd(win, COLOR_PAIR (GPUTOP_BAR_BAD_COLOR));
+        print_percentage_spark(win, x, y, 100);
+    }
+}
+
+static void
+trace_print_raw_oa_counter(WINDOW *win, int x, int y,
+			   struct gputop_perf_query_counter *counter)
+{
+}
+
+static void
+print_trace_counter_names(WINDOW *win, const struct gputop_perf_query *query)
+{
+    int i;
+    int y = 10;
+
+    wattrset(win, A_NORMAL);
+    for (i = 0; i < query->n_counters; i++) {
+    //for (i = 0; i < 7; i++) {
+	struct gputop_perf_query_counter *counter = &query->counters[i];
+
+	mvwprintw(win, y, 0, "%25s: ", counter->name);
+
+	y += (SPARKLINE_HEIGHT + 1);
+    }
+}
+
+static void
+print_trace_counter_spark(WINDOW *win, const struct gputop_perf_query *query, int x)
+{
+    int i;
+    int y = 10;
+
+    x += 27;
+
+    for (i = 0; i < query->n_counters; i++) {
+    //for (i = 0; i < 7; i++) {
+	struct gputop_perf_query_counter *counter = &query->counters[i];
+
+	trace_print_percentage_oa_counter(win, x, y, counter);
+	y += (SPARKLINE_HEIGHT + 1);
+	continue;
+
+	switch (counter->type) {
+	case GPUTOP_PERFQUERY_COUNTER_EVENT:
+	    trace_print_raw_oa_counter(win, x, y, counter);
+	    break;
+	case GPUTOP_PERFQUERY_COUNTER_DURATION_NORM:
+	    trace_print_raw_oa_counter(win, x, y, counter);
+	    break;
+	case GPUTOP_PERFQUERY_COUNTER_DURATION_RAW:
+	    if (counter->max == 100)
+		trace_print_percentage_oa_counter(win, x, y, counter);
+	    else
+		trace_print_raw_oa_counter(win, x, y, counter);
+	    break;
+	case GPUTOP_PERFQUERY_COUNTER_THROUGHPUT:
+	    trace_print_raw_oa_counter(win, x, y, counter);
+	    break;
+	case GPUTOP_PERFQUERY_COUNTER_RAW:
+	    if (counter->max == 100)
+		trace_print_percentage_oa_counter(win, x, y, counter);
+	    else
+		trace_print_raw_oa_counter(win, x, y, counter);
+	    break;
+	case GPUTOP_PERFQUERY_COUNTER_TIMESTAMP:
+	    trace_print_raw_oa_counter(win, x, y, counter);
+	    break;
+	}
+
+	y += SPARKLINE_HEIGHT;
+    }
+}
+
+static uint64_t trace_view_start;
+static double trace_view_scale;
+
+const uint8_t *
+get_next_trace_sample(const struct gputop_perf_query *query, const uint8_t *current_sample)
+{
+    const uint8_t *next = current_sample + query->perf_raw_size;
+
+    if (next >= (gputop_perf_trace_buffer + gputop_perf_trace_buffer_size))
+	next = gputop_perf_trace_buffer;
+
+    return next;
+}
+
+static void
+perf_trace_redraw(WINDOW *win)
+{
+    const struct gputop_perf_query *query = gputop_current_perf_query;
+    //int win_width;
+    //int win_height __attribute__ ((unused));
+    int j;
+    int y = 0;
+    size_t fill = gputop_perf_trace_full ?
+	gputop_perf_trace_buffer_size : gputop_perf_trace_head - gputop_perf_trace_buffer;
+    float fill_percentage = 100.0f * ((float)fill / (float)gputop_perf_trace_buffer_size);
+    int timeline_width = 50;
+    uint64_t ns_per_column = 1000000000 / timeline_width;
+    uint64_t start_timestamp;
+    //float bars[timeline_width];
+    const uint8_t *report0;
+    const uint8_t *report1;
+    int i;
+
+    wattrset(win, A_NORMAL);
+
+    //getmaxyx(win, win_height, win_width);
+
+    if (gputop_perf_error) {
+	mvwprintw(win, 2, 0, "%s", gputop_perf_error);
+	return;
+    }
+
+    gputop_perf_read_samples();
+
+    mvwprintw(win, 2, 0, "Trace buffer fill %3.0f (%d samples): ", fill_percentage);
+    print_percentage_bar(win, 2, 25, fill_percentage);
+
+    mvwprintw(win, 3, 0, "n_samples = %d", gputop_perf_n_samples);
+
+    if (!gputop_perf_trace_full) {
+	mvwprintw(win, 5, 0, "Trace buffer not full yet...");
+	return;
+    }
+
+    report0 = gputop_perf_trace_head;
+    report1 = get_next_trace_sample(query, report0);
+    start_timestamp = read_report_timestamp((uint32_t *)report0);
+
+    gputop_perf_accumulator_clear();
+
+    print_trace_counter_names(win, query);
+
+    for (i = 0; i < timeline_width; i++) {
+	uint64_t column_end = start_timestamp + trace_view_start +
+	    (i *  ns_per_column) + ns_per_column;
+
+	while (1) {
+	    uint64_t report0_timestamp = read_report_timestamp((uint32_t *)report0);
+	    uint64_t report1_timestamp = read_report_timestamp((uint32_t *)report1);
+
+	    if (report1_timestamp <= start_timestamp)
+		return;
+
+	    if (report1_timestamp >= column_end) {
+		print_trace_counter_spark(win, query, i);
+		gputop_perf_accumulator_clear();
+		break;
+	    }
+
+	    gputop_perf_accumulate(query,
+				   report0, report1,
+				   gputop_perf_accumulator);
+
+	    report0 = report1;
+	    report1 = get_next_trace_sample(query, report0);
+	}
+    }
+}
+
+static void
 perf_basic_tab_enter(void)
 {
     gputop_perf_overview_open(GPUTOP_PERF_QUERY_BASIC);
@@ -307,6 +534,40 @@ static struct tab tab_3d =
     .leave = perf_3d_tab_leave,
     .input = perf_3d_tab_input,
     .redraw = perf_3d_tab_redraw,
+};
+
+static void
+perf_3d_trace_tab_enter(void)
+{
+    gputop_perf_trace_open(GPUTOP_PERF_QUERY_3D_BASIC);
+}
+
+static void
+perf_3d_trace_tab_leave(void)
+{
+    gputop_perf_trace_close();
+}
+
+static void
+perf_3d_trace_tab_input(int key)
+{
+
+}
+
+static void
+perf_3d_trace_tab_redraw(WINDOW *win)
+{
+    perf_trace_redraw(win);
+}
+
+static struct tab tab_3d_trace =
+{
+    .nick = "3D Trace",
+    .name = "3D Counter Trace (system wide)",
+    .enter = perf_3d_trace_tab_enter,
+    .leave = perf_3d_trace_tab_leave,
+    .input = perf_3d_trace_tab_input,
+    .redraw = perf_3d_trace_tab_redraw,
 };
 
 static void
@@ -975,6 +1236,7 @@ gputop_ui_init(void)
 
     gputop_list_insert(tabs.prev, &tab_basic.link);
     gputop_list_insert(tabs.prev, &tab_3d.link);
+    gputop_list_insert(tabs.prev, &tab_3d_trace.link);
     current_tab = &tab_basic;
 
     pthread_attr_init(&attrs);
