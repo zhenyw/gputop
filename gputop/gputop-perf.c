@@ -128,7 +128,7 @@ struct perf_oa_user {
 
 static struct perf_oa_user *current_user;
 
-#define MAX_PERF_QUERIES 2
+#define MAX_PERF_QUERIES 3
 #define MAX_PERF_QUERY_COUNTERS 150
 #define MAX_OA_QUERY_COUNTERS 100
 
@@ -1247,6 +1247,7 @@ hsw_add_aggregate_counters(struct gputop_query_builder *builder)
 				a_offset + 12, /* aggregate active */
 				a_offset + 13, /* aggregate stall */
 				a_offset + 15); /* n threads loaded */
+#endif
 
     add_pipeline_stage_counters(builder,
 				"CS",
@@ -1254,7 +1255,6 @@ hsw_add_aggregate_counters(struct gputop_query_builder *builder)
 				a_offset + 17, /* aggregate active */
 				a_offset + 18, /* aggregate stall */
 				a_offset + 20); /* n threads loaded */
-#endif
 
     add_pipeline_stage_counters(builder,
 				"GS",
@@ -1583,6 +1583,153 @@ hsw_add_3d_oa_counter_query(void)
 }
 
 static void
+hsw_add_compute_counters(struct gputop_query_builder *builder)
+{
+    struct gputop_oa_counter *raw0;
+    struct gputop_oa_counter *raw1;
+    struct gputop_oa_counter *typed_read;
+    struct gputop_oa_counter *typed_write;
+    struct gputop_oa_counter *typed_atomics;
+    struct gputop_oa_counter *untyped_read;
+    struct gputop_oa_counter *untyped_write;
+    struct gputop_oa_counter *slm_read;
+    struct gputop_oa_counter *slm_write;
+
+    raw0 = add_raw_oa_counter(builder, 0xd0>>2);
+    raw0 = add_scaled_uint64_oa_counter(builder, raw0, 64);
+
+    raw1 = add_raw_oa_counter(builder, 0xd4>>2);
+    raw1 = add_scaled_uint64_oa_counter(builder, raw0, 64);
+
+    typed_read = add_hsw_slice_extrapolated_oa_counter(builder, raw0, raw1);
+    report_uint64_oa_counter_as_raw_uint64(builder,
+					   "TYPED_BYTES_READ",
+					   "TYPED_BYTES_READ",
+					   typed_read);
+
+    raw0 = add_raw_oa_counter(builder, 0xd8>>2);
+    raw0 = add_scaled_uint64_oa_counter(builder, raw0, 64);
+
+    raw1 = add_raw_oa_counter(builder, 0xdc>>2);
+    raw1 = add_scaled_uint64_oa_counter(builder, raw1, 64);
+
+    typed_write = add_hsw_slice_extrapolated_oa_counter(builder, raw0, raw1);
+    report_uint64_oa_counter_as_raw_uint64(builder,
+					   "TYPED_BYTES_WRITTEN",
+					   "TYPED_BYTES_WRITTEN",
+					   typed_write);
+
+    raw0 = add_raw_oa_counter(builder, 0xc0>>2);
+    raw0 = add_scaled_uint64_oa_counter(builder, raw0, 64);
+
+    raw1 = add_raw_oa_counter(builder, 0xc4>>2);
+    raw1 = add_scaled_uint64_oa_counter(builder, raw1, 64);
+
+    untyped_read = add_hsw_slice_extrapolated_oa_counter(builder, raw0, raw1);
+    report_uint64_oa_counter_as_raw_uint64(builder,
+					   "UNTYPED_BYTES_READ",
+					   "UNTYPED_BYTES_READ",
+					   untyped_read);
+
+    raw0 = add_raw_oa_counter(builder, 0xc8>>2);
+    raw0 = add_scaled_uint64_oa_counter(builder, raw0, 64);
+
+    raw1 = add_raw_oa_counter(builder, 0xcc>>2);
+    raw1 = add_scaled_uint64_oa_counter(builder, raw1, 64);
+
+    untyped_write = add_hsw_slice_extrapolated_oa_counter(builder, raw0, raw1);
+    report_uint64_oa_counter_as_raw_uint64(builder,
+					   "UNTYPED_BYTES_WRITTEN",
+					   "UNTYPED_BYTES_WRITTEN",
+					   untyped_write);
+
+    raw0 = add_raw_oa_counter(builder, 0xf8>>2);
+    raw0 = add_scaled_uint64_oa_counter(builder, raw0, 64);
+
+    raw1 = add_raw_oa_counter(builder, 0xfc>>2);
+    raw1 = add_scaled_uint64_oa_counter(builder, raw1, 64);
+
+    slm_read = add_hsw_slice_extrapolated_oa_counter(builder, raw0, raw1);
+    report_uint64_oa_counter_as_raw_uint64(builder,
+					   "SLM_BYTES_READ",
+					   "SLM_BYTES_READ",
+					   slm_read);
+
+    raw0 = add_raw_oa_counter(builder, 0xf0>>2);
+    raw0 = add_scaled_uint64_oa_counter(builder, raw0, 64);
+
+    raw1 = add_raw_oa_counter(builder, 0xf4>>2);
+    raw1 = add_scaled_uint64_oa_counter(builder, raw1, 64);
+
+    slm_write = add_hsw_slice_extrapolated_oa_counter(builder, raw0, raw1);
+    report_uint64_oa_counter_as_raw_uint64(builder,
+					   "SLM_BYTES_WRITTEN",
+					   "SLM_BYTES_WRITTEN",
+					   slm_write);
+
+    raw0 = add_raw_oa_counter(builder, 0xe0>>2);
+    raw1 = add_raw_oa_counter(builder, 0xe4>>2);
+    typed_atomics = add_hsw_slice_extrapolated_oa_counter(builder, raw0, raw1);
+    report_uint64_oa_counter_as_raw_uint64(builder,
+					   "TYPED_ATOMICS",
+					   "TYPED_ATOMICS",
+					   typed_atomics);
+}
+
+
+static void
+hsw_add_compute_oa_counter_query(void)
+{
+    struct gputop_query_builder builder;
+    struct gputop_perf_query *query = &perf_queries[I915_OA_METRICS_SET_COMPUTE];
+    int a_offset;
+    int b_offset;
+    int c_offset;
+    struct gputop_oa_counter *elapsed;
+    struct gputop_oa_counter *c;
+
+    query->name = "Gen7 Compute Observability Architecture Counters";
+    query->counters = xmalloc0(sizeof(struct gputop_perf_query_counter) *
+			       MAX_PERF_QUERY_COUNTERS);
+    query->n_counters = 0;
+    query->oa_counters = xmalloc0(sizeof(struct gputop_oa_counter) *
+				  MAX_OA_QUERY_COUNTERS);
+    query->n_oa_counters = 0;
+    query->perf_oa_metrics_set = I915_OA_METRICS_SET_COMPUTE;
+    query->perf_oa_format = I915_OA_FORMAT_A45_B8_C8_HSW;
+    query->perf_raw_size = 256;
+
+    builder.query = query;
+    builder.next_accumulator_index = 0;
+
+    builder.a_offset = a_offset = 3;
+    builder.b_offset = b_offset = a_offset + 45;
+    builder.c_offset = c_offset = b_offset + 8;
+
+    /* Can be referenced by other counters... */
+    builder.gpu_core_clock = add_raw_oa_counter(&builder, c_offset + 2);
+
+    elapsed = add_elapsed_oa_counter(&builder);
+    report_uint64_oa_counter_as_duration(&builder,
+					 "GPU Time Elapsed",
+					 "Time elapsed on the GPU during the measurement.",
+					 elapsed);
+
+    c = add_avg_frequency_oa_counter(&builder, elapsed);
+    report_uint64_oa_counter_as_uint64_event(&builder,
+					     "AVG GPU Core Frequency",
+					     "Average GPU Core Frequency in the measurement.",
+					     c);
+
+    hsw_add_aggregate_counters(&builder);
+
+    hsw_add_compute_counters(&builder);
+
+    assert(query->n_counters < MAX_PERF_QUERY_COUNTERS);
+    assert(query->n_oa_counters < MAX_OA_QUERY_COUNTERS);
+}
+
+static void
 bdw_add_aggregate_counters(struct gputop_query_builder *builder)
 {
     struct gputop_oa_counter *raw;
@@ -1780,6 +1927,7 @@ initialize(void)
     if (IS_HASWELL(intel_dev.device)) {
 	hsw_add_basic_oa_counter_query();
 	hsw_add_3d_oa_counter_query();
+	hsw_add_compute_oa_counter_query();
     } else if (IS_BROADWELL(intel_dev.device))
 	bdw_add_3d_oa_counter_query();
 

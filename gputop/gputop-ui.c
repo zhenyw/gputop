@@ -355,6 +355,40 @@ static struct tab tab_3d =
 };
 
 static void
+perf_compute_tab_enter(void)
+{
+    gputop_perf_overview_open(GPUTOP_PERF_QUERY_COMPUTE_BASIC);
+}
+
+static void
+perf_compute_tab_leave(void)
+{
+    gputop_perf_overview_close();
+}
+
+static void
+perf_compute_tab_input(int key)
+{
+
+}
+
+static void
+perf_compute_tab_redraw(WINDOW *win)
+{
+    perf_counters_redraw(win);
+}
+
+static struct tab tab_compute =
+{
+    .nick = "Compute",
+    .name = "Compute Counters (system wide)",
+    .enter = perf_compute_tab_enter,
+    .leave = perf_compute_tab_leave,
+    .input = perf_compute_tab_input,
+    .redraw = perf_compute_tab_redraw,
+};
+
+static void
 gl_basic_tab_enter(void)
 {
     if (gputop_has_intel_performance_query_ext)
@@ -1017,6 +1051,7 @@ gputop_ui_init(void)
 
     gputop_list_insert(tabs.prev, &tab_basic.link);
     gputop_list_insert(tabs.prev, &tab_3d.link);
+    gputop_list_insert(tabs.prev, &tab_compute.link);
     current_tab = &tab_basic;
 
     pthread_attr_init(&attrs);

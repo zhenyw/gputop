@@ -79,6 +79,7 @@ typedef enum gputop_perf_query_type
 {
     GPUTOP_PERF_QUERY_BASIC,
     GPUTOP_PERF_QUERY_3D_BASIC,
+    GPUTOP_PERF_QUERY_COMPUTE_BASIC,
 } gputop_perf_query_type_t;
 
 bool gputop_perf_overview_open(gputop_perf_query_type_t query_type);
