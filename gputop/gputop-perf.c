@@ -300,6 +300,7 @@ init_dev_info(int drm_fd, uint32_t devid)
 	assert(0);
 #endif
     }
+    gputop_devinfo.n_eu_threads = 7 * gputop_devinfo.n_eus;
 }
 
 /* Handle restarting ioctl if interupted... */

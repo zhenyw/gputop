@@ -137,6 +137,7 @@ hw_vars["$EuCoresTotalCount"] = "devinfo->n_eus"
 hw_vars["$EuSlicesTotalCount"] = "devinfo->n_eu_slices"
 hw_vars["$EuSubslicesTotalCount"] = "devinfo->n_eu_sub_slices"
 hw_vars["$SamplersTotalCount"] = "devinfo->n_samplers"
+hw_vars["$EuThreadsCount"] = "devinfo->n_eu_threads"
 
 counter_vars = {}
 
