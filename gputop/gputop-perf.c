@@ -61,6 +61,7 @@
 
 #include "oa-hsw.h"
 #include "oa-bdw.h"
+#include "oa-chv.h"
 
 /* XXX: temporary hack... */
 #ifndef I915_OA_FORMAT_A36_B8_C8_BDW
@@ -597,6 +598,9 @@ gputop_perf_initialize(void)
     } else if (IS_BROADWELL(intel_dev.device)) {
 	gputop_oa_add_render_basic_counter_query_bdw();
 	gputop_oa_add_compute_basic_counter_query_bdw();
+    } else if (IS_CHERRYVIEW(intel_dev.device)) {
+	gputop_oa_add_render_basic_counter_query_chv();
+	gputop_oa_add_compute_basic_counter_query_chv();
     } else
 	assert(0);
 
@@ -643,7 +647,7 @@ gputop_perf_accumulate(struct gputop_perf_query *query,
    const uint32_t *end = (const uint32_t *)report1;
    int i;
 
-   if (IS_BROADWELL(intel_dev.device) &&
+   if (IS_GEN8(intel_dev.device) &&
        query->perf_oa_format == I915_OA_FORMAT_A36_B8_C8_BDW)
    {
        int idx = 0;

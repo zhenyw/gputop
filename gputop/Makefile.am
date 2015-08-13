@@ -27,6 +27,8 @@ libgputop_la_SOURCES = \
     oa-hsw.c \
     oa-bdw.h \
     oa-bdw.c \
+    oa-chv.h \
+    oa-chv.c \
     gputop-perf.h \
     gputop-perf.c \
     gputop-util.h \
@@ -78,7 +80,9 @@ BUILT_SOURCES = \
     oa-hsw.h \
     oa-hsw.c \
     oa-bdw.h \
-    oa-bdw.c
+    oa-bdw.c \
+    oa-chv.h \
+    oa-chv.c
 
 oa-hsw.c: oa-hsw.xml oa-gen.py
 	$(PYTHON2) $(PYTHON_FLAGS) $(srcdir)/oa-gen.py --code=$(builddir)/oa-hsw.c --include="oa-hsw.h" $(srcdir)/oa-hsw.xml
@@ -91,3 +95,9 @@ oa-bdw.c: oa-bdw.xml oa-gen.py
 
 oa-bdw.h: oa-bdw.xml oa-gen.py
 	$(PYTHON2) $(PYTHON_FLAGS) $(srcdir)/oa-gen.py --header=$(builddir)/oa-bdw.h $(srcdir)/oa-bdw.xml
+
+oa-chv.c: oa-chv.xml oa-gen.py
+	$(PYTHON2) $(PYTHON_FLAGS) $(srcdir)/oa-gen.py --code=$(builddir)/oa-chv.c --include="oa-chv.h" $(srcdir)/oa-chv.xml
+
+oa-chv.h: oa-chv.xml oa-gen.py
+	$(PYTHON2) $(PYTHON_FLAGS) $(srcdir)/oa-gen.py --header=$(builddir)/oa-chv.h $(srcdir)/oa-chv.xml

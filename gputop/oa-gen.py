@@ -377,7 +377,7 @@ for set in tree.findall(".//set"):
     c("query->n_counters = 0;\n")
     c("query->perf_oa_metrics_set = I915_OA_METRICS_SET_" + perf_suffix + ";\n")
 
-    if chipset == "bdw":
+    if chipset == "bdw" or chipset == "chv":
         c("""query->perf_oa_format = I915_OA_FORMAT_A36_B8_C8_BDW;
 
 query->perf_raw_size = 256;
