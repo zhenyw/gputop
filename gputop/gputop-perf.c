@@ -596,6 +596,7 @@ gputop_perf_initialize(void)
 	gputop_oa_add_sampler_balance_counter_query_hsw();
     } else if (IS_BROADWELL(intel_dev.device)) {
 	gputop_oa_add_render_basic_counter_query_bdw();
+	gputop_oa_add_compute_basic_counter_query_bdw();
     } else
 	assert(0);
 
