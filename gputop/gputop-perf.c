@@ -63,14 +63,6 @@
 #include "oa-bdw.h"
 #include "oa-chv.h"
 
-/* XXX: temporary hack... */
-#ifndef I915_OA_FORMAT_A36_B8_C8_BDW
-#define I915_OA_FORMAT_A12_BDW         0
-#define I915_OA_FORMAT_A12_B8_C8_BDW   2
-#define I915_OA_FORMAT_A36_B8_C8_BDW   5
-#define I915_OA_FORMAT_C4_B8_BDW       7
-#endif
-
 /* Samples read from the perf circular buffer */
 struct oa_perf_sample {
    struct perf_event_header header;
@@ -648,7 +640,7 @@ gputop_perf_accumulate(struct gputop_perf_query *query,
    int i;
 
    if (IS_GEN8(intel_dev.device) &&
-       query->perf_oa_format == I915_OA_FORMAT_A36_B8_C8_BDW)
+       query->perf_oa_format == I915_OA_FORMAT_A32u40_A4u32_B8_C8)
    {
        int idx = 0;
 
@@ -668,7 +660,7 @@ gputop_perf_accumulate(struct gputop_perf_query *query,
 	   accumulate_uint32(start + 48 + i, end + 48 + i, accumulator + idx++);
 
    } else if (IS_HASWELL(intel_dev.device) &&
-	      query->perf_oa_format == I915_OA_FORMAT_A45_B8_C8_HSW)
+	      query->perf_oa_format == I915_OA_FORMAT_A45_B8_C8)
    {
        accumulate_uint32(start + 1, end + 1, accumulator); /* timestamp */
 
