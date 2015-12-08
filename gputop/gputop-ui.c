@@ -518,6 +518,42 @@ perf_oa_trace_redraw(WINDOW *win)
     }
 }
 
+#define NEW_TAB(NAME, NICK, DESC, ENTER, LEAVE, INPUT, REDRAW)\
+    static struct tab tab_##NAME =			      \
+    {							      \
+	.nick = NICK,					      \
+	.name = DESC,					      \
+	.enter = ENTER,					      \
+	.leave = LEAVE,					      \
+	.input = INPUT,					      \
+	.redraw = REDRAW,				      \
+    }
+
+#define NEW_PERF_COMMON_TAB(NAME, NICK, DESC)\
+    NEW_TAB(NAME, NICK, DESC, perf_##NAME##_tab_enter,\
+	    perf_common_tab_leave, perf_common_tab_input,\
+	    perf_common_tab_redraw)
+
+static void
+perf_common_tab_leave(void)
+{
+    gputop_i915_perf_oa_overview_close();
+
+    uv_timer_stop(&timer);
+}
+
+static void
+perf_common_tab_input(int key)
+{
+
+}
+
+static void
+perf_common_tab_redraw(WINDOW *win)
+{
+    perf_counters_redraw(win);
+}
+
 static void
 perf_3d_tab_enter(void)
 {
@@ -527,35 +563,7 @@ perf_3d_tab_enter(void)
     gputop_i915_perf_oa_overview_open(I915_OA_METRICS_SET_3D, false);
 }
 
-static void
-perf_3d_tab_leave(void)
-{
-    gputop_i915_perf_oa_overview_close();
-
-    uv_timer_stop(&timer);
-}
-
-static void
-perf_3d_tab_input(int key)
-{
-
-}
-
-static void
-perf_3d_tab_redraw(WINDOW *win)
-{
-    perf_counters_redraw(win);
-}
-
-static struct tab tab_3d =
-{
-    .nick = "3D",
-    .name = "3D Counters (system wide)",
-    .enter = perf_3d_tab_enter,
-    .leave = perf_3d_tab_leave,
-    .input = perf_3d_tab_input,
-    .redraw = perf_3d_tab_redraw,
-};
+NEW_PERF_COMMON_TAB(3d, "3D", "3D Counters (system wide)");
 
 static void
 perf_per_ctx_3d_tab_enter(void)
@@ -566,35 +574,7 @@ perf_per_ctx_3d_tab_enter(void)
     gputop_i915_perf_oa_overview_open(I915_OA_METRICS_SET_3D, true);
 }
 
-static void
-perf_per_ctx_3d_tab_leave(void)
-{
-    gputop_i915_perf_oa_overview_close();
-
-    uv_timer_stop(&timer);
-}
-
-static void
-perf_per_ctx_3d_tab_input(int key)
-{
-
-}
-
-static void
-perf_per_ctx_3d_tab_redraw(WINDOW *win)
-{
-    perf_counters_redraw(win);
-}
-
-static struct tab tab_per_ctx_3d =
-{
-    .nick = "3D (per-context)",
-    .name = "3D Counters (per-context)",
-    .enter = perf_per_ctx_3d_tab_enter,
-    .leave = perf_per_ctx_3d_tab_leave,
-    .input = perf_per_ctx_3d_tab_input,
-    .redraw = perf_per_ctx_3d_tab_redraw,
-};
+NEW_PERF_COMMON_TAB(per_ctx_3d, "3D (per-context)", "3D Counters (per-context)");
 
 static void
 perf_compute_tab_enter(void)
@@ -605,35 +585,7 @@ perf_compute_tab_enter(void)
     gputop_i915_perf_oa_overview_open(I915_OA_METRICS_SET_COMPUTE, false);
 }
 
-static void
-perf_compute_tab_leave(void)
-{
-    gputop_i915_perf_oa_overview_close();
-
-    uv_timer_stop(&timer);
-}
-
-static void
-perf_compute_tab_input(int key)
-{
-
-}
-
-static void
-perf_compute_tab_redraw(WINDOW *win)
-{
-    perf_counters_redraw(win);
-}
-
-static struct tab tab_compute =
-{
-    .nick = "GPGPU",
-    .name = "Compute Counters (system wide)",
-    .enter = perf_compute_tab_enter,
-    .leave = perf_compute_tab_leave,
-    .input = perf_compute_tab_input,
-    .redraw = perf_compute_tab_redraw,
-};
+NEW_PERF_COMMON_TAB(compute, "GPGPU", "Compute Counters (system wide)");
 
 static void
 perf_compute_extended_tab_enter(void)
@@ -644,35 +596,7 @@ perf_compute_extended_tab_enter(void)
     gputop_i915_perf_oa_overview_open(I915_OA_METRICS_SET_COMPUTE_EXTENDED, false);
 }
 
-static void
-perf_compute_extended_tab_leave(void)
-{
-    gputop_i915_perf_oa_overview_close();
-
-    uv_timer_stop(&timer);
-}
-
-static void
-perf_compute_extended_tab_input(int key)
-{
-
-}
-
-static void
-perf_compute_extended_tab_redraw(WINDOW *win)
-{
-    perf_counters_redraw(win);
-}
-
-static struct tab tab_compute_extended =
-{
-    .nick = "GPGPU+",
-    .name = "Extended Compute Counters (system wide)",
-    .enter = perf_compute_extended_tab_enter,
-    .leave = perf_compute_extended_tab_leave,
-    .input = perf_compute_extended_tab_input,
-    .redraw = perf_compute_extended_tab_redraw,
-};
+NEW_PERF_COMMON_TAB(compute_extended, "GPGPU+", "Extended Compute Counters (system wide)");
 
 static void
 perf_memory_reads_tab_enter(void)
@@ -683,35 +607,7 @@ perf_memory_reads_tab_enter(void)
     gputop_i915_perf_oa_overview_open(I915_OA_METRICS_SET_MEMORY_READS, false);
 }
 
-static void
-perf_memory_reads_tab_leave(void)
-{
-    gputop_i915_perf_oa_overview_close();
-
-    uv_timer_stop(&timer);
-}
-
-static void
-perf_memory_reads_tab_input(int key)
-{
-
-}
-
-static void
-perf_memory_reads_tab_redraw(WINDOW *win)
-{
-    perf_counters_redraw(win);
-}
-
-static struct tab tab_memory_reads =
-{
-    .nick = "MemR",
-    .name = "Memory Reads (system wide)",
-    .enter = perf_memory_reads_tab_enter,
-    .leave = perf_memory_reads_tab_leave,
-    .input = perf_memory_reads_tab_input,
-    .redraw = perf_memory_reads_tab_redraw,
-};
+NEW_PERF_COMMON_TAB(memory_reads, "MemR", "Memory Reads (system wide)");
 
 static void
 perf_memory_writes_tab_enter(void)
@@ -722,35 +618,7 @@ perf_memory_writes_tab_enter(void)
     gputop_i915_perf_oa_overview_open(I915_OA_METRICS_SET_MEMORY_WRITES, false);
 }
 
-static void
-perf_memory_writes_tab_leave(void)
-{
-    gputop_i915_perf_oa_overview_close();
-
-    uv_timer_stop(&timer);
-}
-
-static void
-perf_memory_writes_tab_input(int key)
-{
-
-}
-
-static void
-perf_memory_writes_tab_redraw(WINDOW *win)
-{
-    perf_counters_redraw(win);
-}
-
-static struct tab tab_memory_writes =
-{
-    .nick = "MemW",
-    .name = "Memory Writes (system wide)",
-    .enter = perf_memory_writes_tab_enter,
-    .leave = perf_memory_writes_tab_leave,
-    .input = perf_memory_writes_tab_input,
-    .redraw = perf_memory_writes_tab_redraw,
-};
+NEW_PERF_COMMON_TAB(memory_writes, "MemW", "Memory Writes (system wide)");
 
 static void
 perf_sampler_balance_tab_enter(void)
@@ -761,35 +629,7 @@ perf_sampler_balance_tab_enter(void)
     gputop_i915_perf_oa_overview_open(I915_OA_METRICS_SET_SAMPLER_BALANCE, false);
 }
 
-static void
-perf_sampler_balance_tab_leave(void)
-{
-    gputop_i915_perf_oa_overview_close();
-
-    uv_timer_stop(&timer);
-}
-
-static void
-perf_sampler_balance_tab_input(int key)
-{
-
-}
-
-static void
-perf_sampler_balance_tab_redraw(WINDOW *win)
-{
-    perf_counters_redraw(win);
-}
-
-static struct tab tab_sampler_balance =
-{
-    .nick = "Sampler Balance",
-    .name = "Sampler Balance (system wide)",
-    .enter = perf_sampler_balance_tab_enter,
-    .leave = perf_sampler_balance_tab_leave,
-    .input = perf_sampler_balance_tab_input,
-    .redraw = perf_sampler_balance_tab_redraw,
-};
+NEW_PERF_COMMON_TAB(sampler_balance, "Sampler Balance", "Sampler Balance (system wide)");
 
 static void
 perf_3d_trace_tab_enter(void)
@@ -803,35 +643,7 @@ perf_3d_trace_tab_enter(void)
     gputop_i915_perf_oa_trace_open(I915_OA_METRICS_SET_3D, false);
 }
 
-static void
-perf_3d_trace_tab_leave(void)
-{
-    gputop_i915_perf_oa_trace_close();
-
-    uv_timer_stop(&timer);
-}
-
-static void
-perf_3d_trace_tab_input(int key)
-{
-
-}
-
-static void
-perf_3d_trace_tab_redraw(WINDOW *win)
-{
-    perf_oa_trace_redraw(win);
-}
-
-static struct tab tab_3d_trace =
-{
-    .nick = "3D Trace",
-    .name = "3D Counter Trace (system wide)",
-    .enter = perf_3d_trace_tab_enter,
-    .leave = perf_3d_trace_tab_leave,
-    .input = perf_3d_trace_tab_input,
-    .redraw = perf_3d_trace_tab_redraw,
-};
+NEW_PERF_COMMON_TAB(3d_trace, "3D Trace", "3D Counter Trace (system wide)");
 
 #ifdef SUPPORT_GL
 static void
@@ -1145,15 +957,11 @@ gl_debug_log_tab_redraw(WINDOW *win)
     pthread_rwlock_unlock(&gputop_log_lock);
 }
 
-static struct tab tab_gl_debug_log =
-{
-    .nick = "Log",
-    .name = "OpenGL debug log",
-    .enter = gl_debug_log_tab_enter,
-    .leave = gl_debug_log_tab_leave,
-    .input = gl_debug_log_tab_input,
-    .redraw = gl_debug_log_tab_redraw,
-};
+NEW_TAB(gl_debug_log, "Log", "OpenGL debug log",
+	gl_debug_log_tab_enter,
+	gl_debug_log_tab_leave,
+	gl_debug_log_tab_input,
+	gl_debug_log_tab_redraw);
 
 static void
 gl_knobs_tab_enter(void)
@@ -1179,15 +987,11 @@ gl_knobs_tab_redraw(WINDOW *win)
 
 }
 
-static struct tab tab_gl_knobs =
-{
-    .nick = "Tune",
-    .name = "OpenGL Tuneables",
-    .enter = gl_knobs_tab_enter,
-    .leave = gl_knobs_tab_leave,
-    .input = gl_knobs_tab_input,
-    .redraw = gl_knobs_tab_redraw,
-};
+NEW_TAB(gl_knobs, "Tune", "OpenGL Tuneables",
+	gl_knobs_tab_enter,
+	gl_knobs_tab_leave,
+	gl_knobs_tab_input,
+	gl_knobs_tab_redraw);
 
 #endif /* SUPPORT_GL */
 
