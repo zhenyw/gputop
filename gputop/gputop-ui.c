@@ -1385,11 +1385,9 @@ gputop_ui_run(void *arg)
     return 0;
 }
 
-__attribute__((constructor)) void
-gputop_ui_init(void)
+void
+gputop_ui_list_init(uint32_t device)
 {
-    pthread_attr_t attrs;
-
     gputop_list_init(&tabs);
 
     gputop_list_insert(tabs.prev, &tab_3d.link);
@@ -1400,9 +1398,16 @@ gputop_ui_init(void)
     gputop_list_insert(tabs.prev, &tab_memory_writes.link);
     gputop_list_insert(tabs.prev, &tab_sampler_balance.link);
     gputop_list_insert(tabs.prev, &tab_3d_trace.link);
+
 #ifdef SUPPORT_GL
     gputop_list_insert(tabs.prev, &tab_gl_debug_log.link);
 #endif
+}
+
+__attribute__((constructor)) void
+gputop_ui_init(void)
+{
+    pthread_attr_t attrs;
 
     pthread_attr_init(&attrs);
     pthread_create(&gputop_ui_thread_id, &attrs, gputop_ui_run, NULL);

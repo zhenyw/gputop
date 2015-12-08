@@ -1140,6 +1140,7 @@ gputop_perf_initialize(void)
     } else
 	assert(0);
 
+    gputop_ui_list_init(intel_dev.device);
     return true;
 }
 

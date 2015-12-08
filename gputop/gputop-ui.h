@@ -35,6 +35,7 @@
 
 extern uv_loop_t *gputop_ui_loop;
 
+void gputop_ui_list_init(uint32_t device);
 void *gputop_ui_run(void *arg);
 
 void gputop_ui_quit_idle_cb(uv_idle_t *idle);
