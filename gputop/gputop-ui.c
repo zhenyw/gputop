@@ -1349,6 +1349,11 @@ common_input(int key)
 	    next = gputop_container_of(current_tab->link.next->next, struct tab, link);
 
 	current_tab->leave();
+
+	/* move it to tail for cyclic view */
+	gputop_list_remove(&current_tab->link);
+	gputop_list_insert(tabs.prev, &current_tab->link);
+
 	current_tab = next;
 	current_tab->enter();
 
