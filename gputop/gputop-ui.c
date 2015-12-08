@@ -37,6 +37,8 @@
  */
 #include "stdatomic.h"
 
+#include "intel_chipset.h"
+
 #include "gputop-perf.h"
 #include "gputop-ui.h"
 #include "gputop-util.h"
@@ -644,6 +646,171 @@ perf_3d_trace_tab_enter(void)
 }
 
 NEW_PERF_COMMON_TAB(3d_trace, "3D Trace", "3D Counter Trace (system wide)");
+
+static void
+perf_render_pipe_profile_tab_enter(void)
+{
+    uv_timer_init(gputop_ui_loop, &timer);
+    uv_timer_start(&timer, timer_cb, 1000, 1000);
+
+    gputop_i915_perf_oa_overview_open(I915_OA_METRICS_SET_RENDER_PIPE_PROFILE, false);
+}
+
+NEW_PERF_COMMON_TAB(render_pipe_profile, "Render Pipe", "Render Pipe profile(system wide)");
+
+static void
+perf_compute_l3_tab_enter(void)
+{
+    uv_timer_init(gputop_ui_loop, &timer);
+    uv_timer_start(&timer, timer_cb, 1000, 1000);
+
+    gputop_i915_perf_oa_overview_open(I915_OA_METRICS_SET_COMPUTE_L3_CACHE, false);
+}
+
+NEW_PERF_COMMON_TAB(compute_l3, "Compute L3", "Compute L3(system wide)");
+
+static void
+perf_data_port_reads_coalescing_tab_enter(void)
+{
+    uv_timer_init(gputop_ui_loop, &timer);
+    uv_timer_start(&timer, timer_cb, 1000, 1000);
+
+    gputop_i915_perf_oa_overview_open(I915_OA_METRICS_SET_DATA_PORT_READS_COALESCING, false);
+}
+
+NEW_PERF_COMMON_TAB(data_port_reads_coalescing, "DP Reads Coalescing", "DataPort Reads Coalescing(system wide)");
+
+static void
+perf_data_port_writes_coalescing_tab_enter(void)
+{
+    uv_timer_init(gputop_ui_loop, &timer);
+    uv_timer_start(&timer, timer_cb, 1000, 1000);
+
+    gputop_i915_perf_oa_overview_open(I915_OA_METRICS_SET_DATA_PORT_WRITES_COALESCING, false);
+}
+
+NEW_PERF_COMMON_TAB(data_port_writes_coalescing, "DP Writes Coalescing", "DataPort Writes Coalescing(system wide)");
+
+static void
+perf_l3_1_tab_enter(void)
+{
+    uv_timer_init(gputop_ui_loop, &timer);
+    uv_timer_start(&timer, timer_cb, 1000, 1000);
+
+    gputop_i915_perf_oa_overview_open(I915_OA_METRICS_SET_L3_1, false);
+}
+
+NEW_PERF_COMMON_TAB(l3_1, "L3_1", "L3_1 (system wide)");
+
+static void
+perf_l3_2_tab_enter(void)
+{
+    uv_timer_init(gputop_ui_loop, &timer);
+    uv_timer_start(&timer, timer_cb, 1000, 1000);
+
+    gputop_i915_perf_oa_overview_open(I915_OA_METRICS_SET_L3_2, false);
+}
+
+NEW_PERF_COMMON_TAB(l3_2, "L3_2", "L3_2 (system wide)");
+
+static void
+perf_l3_3_tab_enter(void)
+{
+    uv_timer_init(gputop_ui_loop, &timer);
+    uv_timer_start(&timer, timer_cb, 1000, 1000);
+
+    gputop_i915_perf_oa_overview_open(I915_OA_METRICS_SET_L3_3, false);
+}
+
+NEW_PERF_COMMON_TAB(l3_3, "L3_3", "L3_3 (system wide)");
+
+static void
+perf_l3_4_tab_enter(void)
+{
+    uv_timer_init(gputop_ui_loop, &timer);
+    uv_timer_start(&timer, timer_cb, 1000, 1000);
+
+    gputop_i915_perf_oa_overview_open(I915_OA_METRICS_SET_L3_4, false);
+}
+
+NEW_PERF_COMMON_TAB(l3_4, "L3_4", "L3_4 (system wide)");
+
+static void
+perf_rasterizer_and_pixel_backend_tab_enter(void)
+{
+    uv_timer_init(gputop_ui_loop, &timer);
+    uv_timer_start(&timer, timer_cb, 1000, 1000);
+
+    gputop_i915_perf_oa_overview_open(I915_OA_METRICS_SET_RASTERIZER_AND_PIXEL_BACKEND, false);
+}
+
+NEW_PERF_COMMON_TAB(rasterizer_and_pixel_backend, "Rasterizer", "Rasterizer and Pixel backend (system wide)");
+
+static void
+perf_sampler_1_tab_enter(void)
+{
+    uv_timer_init(gputop_ui_loop, &timer);
+    uv_timer_start(&timer, timer_cb, 1000, 1000);
+
+    gputop_i915_perf_oa_overview_open(I915_OA_METRICS_SET_SAMPLER_1, false);
+}
+
+NEW_PERF_COMMON_TAB(sampler_1, "Sampler_1", "Sampler_1 (system wide)");
+
+static void
+perf_sampler_2_tab_enter(void)
+{
+    uv_timer_init(gputop_ui_loop, &timer);
+    uv_timer_start(&timer, timer_cb, 1000, 1000);
+
+    gputop_i915_perf_oa_overview_open(I915_OA_METRICS_SET_SAMPLER_2, false);
+}
+
+NEW_PERF_COMMON_TAB(sampler_2, "Sampler_2", "Sampler_2 (system wide)");
+
+static void
+perf_tdl_1_tab_enter(void)
+{
+    uv_timer_init(gputop_ui_loop, &timer);
+    uv_timer_start(&timer, timer_cb, 1000, 1000);
+
+    gputop_i915_perf_oa_overview_open(I915_OA_METRICS_SET_TDL_1, false);
+}
+
+NEW_PERF_COMMON_TAB(tdl_1, "TDL_1", "TDL_1 (system wide)");
+
+static void
+perf_tdl_2_tab_enter(void)
+{
+    uv_timer_init(gputop_ui_loop, &timer);
+    uv_timer_start(&timer, timer_cb, 1000, 1000);
+
+    gputop_i915_perf_oa_overview_open(I915_OA_METRICS_SET_TDL_2, false);
+}
+
+NEW_PERF_COMMON_TAB(tdl_2, "TDL_2", "TDL_2 (system wide)");
+
+static void
+perf_hdc_and_sf_tab_enter(void)
+{
+    uv_timer_init(gputop_ui_loop, &timer);
+    uv_timer_start(&timer, timer_cb, 1000, 1000);
+
+    gputop_i915_perf_oa_overview_open(I915_OA_METRICS_SET_HDC_AND_SF, false);
+}
+
+NEW_PERF_COMMON_TAB(hdc_and_sf, "HDC and SF", "HDC and SF (system wide)");
+
+static void
+perf_sampler_tab_enter(void)
+{
+    uv_timer_init(gputop_ui_loop, &timer);
+    uv_timer_start(&timer, timer_cb, 1000, 1000);
+
+    gputop_i915_perf_oa_overview_open(I915_OA_METRICS_SET_SAMPLER, false);
+}
+
+NEW_PERF_COMMON_TAB(sampler, "Sampler", "Sampler (system wide)");
 
 #ifdef SUPPORT_GL
 static void
@@ -1396,7 +1563,54 @@ gputop_ui_list_init(uint32_t device)
     gputop_list_insert(tabs.prev, &tab_compute_extended.link);
     gputop_list_insert(tabs.prev, &tab_memory_reads.link);
     gputop_list_insert(tabs.prev, &tab_memory_writes.link);
-    gputop_list_insert(tabs.prev, &tab_sampler_balance.link);
+
+    if (IS_HASWELL(device))
+	gputop_list_insert(tabs.prev, &tab_sampler_balance.link);
+
+    if (IS_BROADWELL(device)) {
+	gputop_list_insert(tabs.prev, &tab_render_pipe_profile.link);
+	gputop_list_insert(tabs.prev, &tab_compute_l3.link);
+	gputop_list_insert(tabs.prev, &tab_data_port_reads_coalescing.link);
+	gputop_list_insert(tabs.prev, &tab_data_port_writes_coalescing.link);
+	gputop_list_insert(tabs.prev, &tab_l3_1.link);
+	gputop_list_insert(tabs.prev, &tab_l3_2.link);
+	gputop_list_insert(tabs.prev, &tab_l3_3.link);
+	gputop_list_insert(tabs.prev, &tab_l3_4.link);
+	gputop_list_insert(tabs.prev, &tab_rasterizer_and_pixel_backend.link);
+	gputop_list_insert(tabs.prev, &tab_sampler_1.link);
+	gputop_list_insert(tabs.prev, &tab_sampler_2.link);
+	gputop_list_insert(tabs.prev, &tab_tdl_1.link);
+	gputop_list_insert(tabs.prev, &tab_tdl_2.link);
+	gputop_list_insert(tabs.prev, &tab_hdc_and_sf.link);
+    }
+
+    if (IS_CHERRYVIEW(device)) {
+	gputop_list_insert(tabs.prev, &tab_render_pipe_profile.link);
+	gputop_list_insert(tabs.prev, &tab_l3_1.link);
+	gputop_list_insert(tabs.prev, &tab_l3_2.link);
+	gputop_list_insert(tabs.prev, &tab_l3_3.link);
+	gputop_list_insert(tabs.prev, &tab_l3_4.link);
+	gputop_list_insert(tabs.prev, &tab_rasterizer_and_pixel_backend.link);
+	gputop_list_insert(tabs.prev, &tab_sampler_1.link);
+	gputop_list_insert(tabs.prev, &tab_sampler_2.link);
+	gputop_list_insert(tabs.prev, &tab_tdl_1.link);
+	gputop_list_insert(tabs.prev, &tab_tdl_2.link);
+	gputop_list_insert(tabs.prev, &tab_hdc_and_sf.link);
+    }
+
+    if (IS_SKYLAKE(device)) {
+	gputop_list_insert(tabs.prev, &tab_render_pipe_profile.link);
+	gputop_list_insert(tabs.prev, &tab_compute_l3.link);
+	gputop_list_insert(tabs.prev, &tab_l3_1.link);
+	gputop_list_insert(tabs.prev, &tab_l3_2.link);
+	gputop_list_insert(tabs.prev, &tab_l3_3.link);
+	gputop_list_insert(tabs.prev, &tab_rasterizer_and_pixel_backend.link);
+	gputop_list_insert(tabs.prev, &tab_sampler.link);
+	gputop_list_insert(tabs.prev, &tab_tdl_1.link);
+	gputop_list_insert(tabs.prev, &tab_tdl_2.link);
+	gputop_list_insert(tabs.prev, &tab_hdc_and_sf.link);
+    }
+
     gputop_list_insert(tabs.prev, &tab_3d_trace.link);
 
 #ifdef SUPPORT_GL
