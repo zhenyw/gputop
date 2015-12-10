@@ -35,8 +35,9 @@
 
 #define I915_PARAM_SUBSLICE_TOTAL	33
 #define I915_PARAM_EU_TOTAL		34
-#define I915_PARAM_SLICE_MASK		37
-#define I915_PARAM_SUBSLICE_MASK	38
+/* below ones are not in upstream yet. */
+#define I915_PARAM_SLICE_MASK		38
+#define I915_PARAM_SUBSLICE_MASK	39
 
 typedef struct i915_getparam {
 	int param;
