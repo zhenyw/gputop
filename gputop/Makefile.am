@@ -39,6 +39,8 @@ libgputop_la_SOURCES = \
     oa-chv.c \
     oa-skl.h \
     oa-skl.c \
+    oa-bxt.h \
+    oa-bxt.c \
     gputop-perf.h \
     gputop-perf.c \
     gputop-util.h \
@@ -78,13 +80,15 @@ oa_xml_files = \
     oa-hsw.xml \
     oa-bdw.xml \
     oa-chv.xml \
-    oa-skl.xml
+    oa-skl.xml \
+    oa-bxt.xml
 
 built_oa_xml_files = \
     hsw.xml \
     bdw.xml \
     chv.xml \
-    skl.xml
+    skl.xml \
+    bxt.xml
 
 libgputop_la_SOURCES += \
     gputop.pb-c.h \
@@ -199,6 +203,8 @@ BUILT_SOURCES = \
     oa-chv.c \
     oa-skl.h \
     oa-skl.c \
+    oa-bxt.h \
+    oa-bxt.c \
     $(built_oa_xml_files)
 
 BUILT_SOURCES += \
@@ -232,6 +238,13 @@ oa-skl.h oa-skl.c skl.xml: oa-skl.xml oa-gen.py
 	    --code=$(builddir)/oa-skl.c \
 	    --chipset="skl" $(srcdir)/oa-skl.xml \
 	    --xml_eq="skl.xml"
+
+oa-bxt.h oa-bxt.c bxt.xml: oa-bxt.xml oa-gen.py
+	$(PYTHON2) $(PYTHON_FLAGS) $(srcdir)/oa-gen.py \
+	    --header=$(builddir)/oa-bxt.h \
+	    --code=$(builddir)/oa-bxt.c \
+	    --chipset="bxt" $(srcdir)/oa-bxt.xml \
+	    --xml_eq="bxt.xml"
 
 %.pb-c.c %.pb-c.h: %.proto
 	$(top_builddir)/protoc-c/protoc-c --c_out=$(top_builddir)/gputop -I$(srcdir) $(srcdir)/$(*F).proto

@@ -33,6 +33,8 @@ gputop/oa-hsw.h
 gputop/oa-hsw.c
 gputop/oa-skl.h
 gputop/oa-skl.c
+gputop/oa-bxt.h
+gputop/oa-bxt.c
 gputop/gputop.pb-c.h
 gputop/gputop.pb-c.c
 gputop/registry/diag.txt

@@ -63,7 +63,7 @@
 #include "oa-bdw.h"
 #include "oa-chv.h"
 #include "oa-skl.h"
-
+#include "oa-bxt.h"
 
 /* Samples read() from i915 perf */
 struct oa_sample {
@@ -1584,6 +1584,8 @@ gputop_perf_initialize(void)
         gputop_oa_add_metrics_chv(&gputop_devinfo);
     } else if (IS_SKYLAKE(intel_dev.device)) {
         gputop_oa_add_metrics_skl(&gputop_devinfo);
+    } else if (IS_BROXTON(intel_dev.device)) {
+        gputop_oa_add_metrics_bxt(&gputop_devinfo);
     } else
         assert(0);
 
