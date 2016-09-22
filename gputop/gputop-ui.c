@@ -109,11 +109,13 @@ struct key_func
     int (*func)(bool change_state, int value);
 };
 
+#ifdef SUPPORT_GL
 int scissor_test(bool change_state, int value);
 
 static const struct key_func knobs[] = {
     {"Scissor Test", scissor_test},
 };
+#endif
 
 static bool added_gl_tabs;
 static gputop_list_t tabs;
