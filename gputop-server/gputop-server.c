@@ -68,6 +68,7 @@ static uv_timer_t timer;
 static bool update_queued;
 static uv_idle_t update_idle;
 
+int last_vgpu_num;
 
 enum {
     WS_MESSAGE_PERF = 1,
@@ -972,6 +973,66 @@ gputop_get_cmd_line_pid(uint32_t pid, char *buf, int len)
     return res;
 }
 
+void  handle_update_hw_id_map(uint32_t *vgpu_id,
+                             uint32_t *ctx_hw_id,
+                             int *current_vgpu_num)
+{
+  int i = 0, max_vgpu_num = 7;
+  int UUID_length = 36;
+  DIR *vgpu_dir;
+  char *vgpu_path="/sys/bus/pci/devices/0000:00:02.0";
+  char *vgpu_id_path, *hw_id_path;
+  struct dirent *entry;
+
+  vgpu_dir=opendir(vgpu_path);
+  while (entry = readdir(vgpu_dir)) {
+      if (entry->d_type == DT_DIR && (strlen(entry->d_name)==UUID_length)) {
+      int ret_vgpu_id_path = asprintf(&vgpu_id_path, "%s/%s/intel_vgpu/vgpu_id", vgpu_path, entry->d_name);
+      int ret_hw_id_path = asprintf(&hw_id_path, "%s/%s/intel_vgpu/hw_id", vgpu_path, entry->d_name);
+      vgpu_id[i] = gputop_read_file_uint64(vgpu_id_path);
+      ctx_hw_id[i] = gputop_read_file_uint64(hw_id_path);
+      i++;
+    }
+  }
+
+  closedir(vgpu_dir);
+  *current_vgpu_num = i;
+}
+
+static
+void handle_get_hw_id_map(h2o_websocket_conn_t *conn,
+                    Gputop__Request *request)
+{
+    int i = 0, max_vgpu_num = 7;
+    int current_vgpu_num;
+    uint32_t ctx_hw_id[max_vgpu_num];
+    uint32_t vgpu_id[max_vgpu_num];
+
+    handle_update_hw_id_map(vgpu_id, ctx_hw_id, &current_vgpu_num);
+
+    if (last_vgpu_num != current_vgpu_num) {
+        fprintf(stderr, "VM has changed!\n");
+    }
+
+    Gputop__Message message = GPUTOP__MESSAGE__INIT;
+    Gputop__HWID hw_id = GPUTOP__HW__ID__INIT;
+
+    message.reply_uuid = request->uuid;
+    message.cmd_case = GPUTOP__MESSAGE__CMD_HW_ID;
+
+    hw_id.n_ctx_hw_id = current_vgpu_num;
+    hw_id.ctx_hw_id = ctx_hw_id;
+
+    hw_id.n_vgpu_id = current_vgpu_num;
+    hw_id.vgpu_id = vgpu_id;
+
+    message.hw_id = &hw_id;
+    send_pb_message(conn, &message.base);
+
+    last_vgpu_num = current_vgpu_num;
+
+}
+
 static void
 handle_get_process_info(h2o_websocket_conn_t *conn,
                     Gputop__Request *request)
@@ -1328,6 +1389,10 @@ static void on_ws_message(h2o_websocket_conn_t *conn,
             break;
         case GPUTOP__REQUEST__REQ_TEST_LOG:
             fprintf(stderr, "TEST LOG: %s\n", request->test_log);
+            break;
+        case GPUTOP__REQUEST__REQ_GET_HW_ID_MAP:
+            fprintf(stderr, "Get HW_ID_MAP request received\n");
+            handle_get_hw_id_map(conn, request);
             break;
         case GPUTOP__REQUEST__REQ__NOT_SET:
             assert(0);

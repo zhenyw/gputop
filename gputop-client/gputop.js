@@ -30,6 +30,11 @@
 var is_nodejs = false;
 var using_emscripten = true;
 
+var ctx_hw_id_ = [];
+var vgpu_id_ = [];
+var ctx_mode=['Global'];
+var map_vgpuID_hwID = [0];
+
 if (typeof module !== 'undefined' && module.exports) {
 
     var WebSocket = require('ws');
@@ -736,6 +741,7 @@ Gputop.prototype.set_demo_architecture = function(architecture) {
     this.demo_architecture = architecture;
     this.is_connected_ = true;
     this.request_features();
+    this.request_hw_id_map();
 }
 
 Gputop.prototype.set_architecture = function(architecture) {
@@ -1361,6 +1367,16 @@ Gputop.prototype.rpc_request = function(method, value, closure) {
     }
 }
 
+Gputop.prototype.request_hw_id_map = function() {
+    if (!this.is_demo()) {
+        if (this.socket_.readyState == is_nodejs ? 1 : WebSocket.OPEN) {
+            this.rpc_request('get_hw_id_map', true);
+        } else {
+            this.log("Can't request context hardware ID map while not connected", this.ERROR);
+        }
+    }
+}
+
 Gputop.prototype.request_features = function() {
     if (!this.is_demo()) {
         if (this.socket_.readyState == is_nodejs ? 1 : WebSocket.OPEN) {
@@ -1649,6 +1665,9 @@ function gputop_socket_on_message(evt) {
                 stream.dispatchEvent(ev);
             }
             break;
+        case 'hw_id':
+            this.update_vgpuID_hwID(msg.hw_id);
+            break;
         }
 
         if (msg.reply_uuid in this.rpc_closures_) {
@@ -1803,6 +1822,8 @@ Gputop.prototype.connect = function(address, onopen, onclose, onerror) {
                 this.socket_ = this.connect_web_socket(websocket_url, () => { //onopen
                     this.is_connected_ = true;
                     this.request_features();
+                    this.request_hw_id_map();
+
 
                     var ev = { type: "open" };
                     this.connection.dispatchEvent(ev);
@@ -1818,6 +1839,7 @@ Gputop.prototype.connect = function(address, onopen, onclose, onerror) {
             } else {
                 this.is_connected_ = true;
                 this.request_features();
+                this.request_hw_id_map();
 
                 var ev = { type: "open" };
                 this.connection.dispatchEvent(ev);
