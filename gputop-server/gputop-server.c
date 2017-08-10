@@ -1013,7 +1013,21 @@ void handle_get_hw_id_map(h2o_websocket_conn_t *conn,
     if (last_vgpu_num != current_vgpu_num) {
         fprintf(stderr, "VM has changed!\n");
     }
+/*
+    fprintf(stderr, "vgpu_id:   ", vgpu_id[i]);
+    for (i = 0; i < current_vgpu_num; i++)
+    {
+        fprintf(stderr, "%d  ", vgpu_id[i]);
+    }
+    fprintf(stderr, "\n");
 
+    fprintf(stderr, "ctx_hw_id: ", vgpu_id[i]);
+    for (i = 0; i < current_vgpu_num; i++)
+    {
+        fprintf(stderr, "%d  ", ctx_hw_id[i]);
+    }
+    fprintf(stderr, "\n");
+*/
     Gputop__Message message = GPUTOP__MESSAGE__INIT;
     Gputop__HWID hw_id = GPUTOP__HW__ID__INIT;
 

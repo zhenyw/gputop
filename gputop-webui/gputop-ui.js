@@ -911,7 +911,7 @@ GputopUI.prototype.update_vgpuID_hwID = function(hw_id) {
          map_vgpuID_hwID[vgpu_id_[i]] = ctx_hw_id_[i];
     }
     for (var i = 1; i < vgpu_id_.length+1; i++) {
-         ctx_mode[i]='VM'+vgpu_id_[i-1];
+         ctx_mode[i]='vGPU'+vgpu_id_[i-1];
     }
     ctx_mode.sort();
 

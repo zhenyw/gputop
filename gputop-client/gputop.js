@@ -1834,7 +1834,6 @@ Gputop.prototype.connect = function(address, onopen, onclose, onerror) {
                 this.socket_ = this.connect_web_socket(websocket_url, () => { //onopen
                     this.is_connected_ = true;
                     this.request_features();
-                    this.request_hw_id_map();
 
 
                     var ev = { type: "open" };
@@ -1851,7 +1850,6 @@ Gputop.prototype.connect = function(address, onopen, onclose, onerror) {
             } else {
                 this.is_connected_ = true;
                 this.request_features();
-                this.request_hw_id_map();
 
                 var ev = { type: "open" };
                 this.connection.dispatchEvent(ev);
